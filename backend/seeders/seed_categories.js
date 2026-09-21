@@ -6,10 +6,10 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }
 const { sequelize, Category, QuestionSource } = require('../src/models');
 
 const CATEGORIES = [
-  { name: 'General Knowledge', slug: 'general-knowledge', external_id: 9 },
-  { name: 'Movies',            slug: 'movies',            external_id: 11 },
-  { name: 'Music',             slug: 'music',             external_id: 12 },
-  { name: 'Sports',            slug: 'sports',            external_id: 21 },
+  { name: 'General Knowledge', slug: 'general-knowledge', external_id: 9,  is_enabled: true },
+  { name: 'Movies',            slug: 'movies',            external_id: 11, is_enabled: true },
+  { name: 'Music',             slug: 'music',             external_id: 12, is_enabled: true },
+  { name: 'Sports',            slug: 'sports',            external_id: 21, is_enabled: true },
 ];
 
 const SOURCES = [
