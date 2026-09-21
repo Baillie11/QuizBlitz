@@ -66,11 +66,30 @@ router.post('/start', optionalAuth, async (req, res) => {
 // Body: { categoryId, difficulty?, score, totalQuestions }
 // Saves a summary game session record.
 router.post('/submit', optionalAuth, async (req, res) => {
-  const { categoryId, difficulty, score, totalQuestions } = req.body;
+  const { categoryId, difficulty, score, totalQuestions, totalTimeMs, answerTimesMs } = req.body;
   if (categoryId == null || score == null || totalQuestions == null) {
     return res
       .status(400)
       .json({ error: 'categoryId, score, and totalQuestions are required' });
+  }
+
+  const parsedScore = parseInt(score);
+  const parsedTotal = parseInt(totalQuestions);
+  if (!Number.isInteger(parsedScore) || !Number.isInteger(parsedTotal) || parsedTotal < 1) {
+    return res.status(400).json({ error: 'Score and totalQuestions must be valid integers' });
+  }
+  if (parsedScore < 0 || parsedScore > parsedTotal) {
+    return res.status(400).json({ error: 'Score must be between 0 and totalQuestions' });
+  }
+  const parsedAnswerTimes = Array.isArray(answerTimesMs)
+    ? answerTimesMs.map(Number)
+    : [];
+  const validTimings = parsedAnswerTimes.length === parsedTotal
+    && parsedAnswerTimes.every((value) => Number.isInteger(value) && value >= 0);
+  const parsedTotalTime = Number(totalTimeMs);
+  if ((answerTimesMs !== undefined || totalTimeMs !== undefined)
+      && (!validTimings || !Number.isInteger(parsedTotalTime) || parsedTotalTime < 0)) {
+    return res.status(400).json({ error: 'Game timing data is invalid' });
   }
 
   try {
@@ -78,8 +97,10 @@ router.post('/submit', optionalAuth, async (req, res) => {
       user_id: req.user ? req.user.id : null,
       category_id: parseInt(categoryId),
       difficulty: difficulty && difficulty !== 'any' ? difficulty : null,
-      score: parseInt(score),
-      total_questions: parseInt(totalQuestions),
+      score: parsedScore,
+      total_questions: parsedTotal,
+      total_time_ms: totalTimeMs === undefined ? null : parsedTotalTime,
+      answer_times_json: answerTimesMs === undefined ? null : parsedAnswerTimes,
       started_at: new Date(),
       finished_at: new Date(),
     });
@@ -90,6 +111,8 @@ router.post('/submit', optionalAuth, async (req, res) => {
         score: session.score,
         totalQuestions: session.total_questions,
         percentage: Math.round((session.score / session.total_questions) * 100),
+        totalTimeMs: session.total_time_ms,
+        answerTimesMs: session.answer_times_json,
       },
     });
   } catch (err) {

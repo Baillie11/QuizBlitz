@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: quizblitz-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm run seed && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quizblitz-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: ADS_ENABLED
+        value: "false"
+      - key: PREMIUM_ENABLED
+        value: "false"
+      - key: ALLOW_DEV_PASSWORD_RESET
+        value: "false"
+      - key: ENABLE_MULTIPLAYER_SCHEDULER
+        value: "false"
+
+databases:
+  - name: quizblitz-db
+    plan: free
+    region: singapore
+    databaseName: quizblitz
+    user: quizblitz
+    postgresMajorVersion: "18"

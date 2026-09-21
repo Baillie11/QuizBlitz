@@ -1,11 +1,11 @@
-# TriviaApp – Level 1
+# QuizBlitz – Level 1
 
 A production-ready trivia app targeting **iOS, Android, and Web** from a single codebase.
 
 ## Architecture
 
 ```
-TriviaApp/
+QuizBlitz/
 ├── backend/    Node.js + Express + MySQL (Sequelize)
 └── mobile/     React Native (Expo SDK 51) – iOS, Android & Web
 ```
@@ -145,7 +145,7 @@ curl http://localhost:3000/admin/stats \
 | PORT               | Server port                                   | 3000                     |
 | DB_HOST            | MySQL host                                    | localhost                |
 | DB_PORT            | MySQL port                                    | 3306                     |
-| DB_NAME            | Database name                                 | triviaapp                |
+| DB_NAME            | Database name                                 | quizblitz                |
 | DB_USER            | MySQL username                                | root                     |
 | DB_PASS            | MySQL password                                | (empty)                  |
 | JWT_SECRET         | Secret for signing JWTs                       | **change this**          |

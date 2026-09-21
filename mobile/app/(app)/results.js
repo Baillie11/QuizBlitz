@@ -12,18 +12,19 @@ function getPerformanceLabel(pct) {
 }
 
 export default function ResultsScreen() {
-  const { score, total, categoryId, categoryName, difficulty } = useLocalSearchParams();
+  const { score, points, total, categoryId, categoryName, difficulty } = useLocalSearchParams();
   const router = useRouter();
 
   const scoreNum = parseInt(score) || 0;
   const totalNum = parseInt(total) || QUESTIONS_PER_GAME;
   const pct = Math.round((scoreNum / totalNum) * 100);
+  const pointsNum = parseInt(points) || 0;
   const { emoji, label } = getPerformanceLabel(pct);
 
   const playAgain = () => {
     router.replace({
       pathname: '/(app)/game',
-      params: { categoryId, categoryName, difficulty, amount: totalNum },
+      params: { categoryId, categoryName, difficulty, amount: totalNum, gameId: Date.now().toString() },
     });
   };
 
@@ -47,6 +48,7 @@ export default function ResultsScreen() {
           </View>
 
           <Text style={styles.pct}>{pct}% correct</Text>
+          <Text style={styles.points}>{pointsNum} points earned</Text>
 
           {/* Score bar */}
           <View style={styles.barBg}>
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
   scoreNumber: { fontSize: 36, fontWeight: '800', color: COLORS.primary },
   scoreTotal: { fontSize: 18, fontWeight: '600', color: COLORS.textSecondary, alignSelf: 'flex-end', paddingBottom: 6 },
   pct: { fontSize: 16, color: COLORS.textSecondary, fontWeight: '600', marginBottom: 16 },
+  points: { fontSize: 14, color: COLORS.primary, fontWeight: '700', marginTop: -8, marginBottom: 16 },
   barBg: { width: '100%', height: 8, backgroundColor: COLORS.border, borderRadius: 4, overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 4 },
   primaryBtn: {

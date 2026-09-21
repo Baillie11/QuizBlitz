@@ -23,7 +23,7 @@ function Layout({ children }) {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          🎯 TriviaApp
+          🎯 QuizBlitz
           <span>Admin Panel</span>
         </div>
         <nav className="sidebar-nav">

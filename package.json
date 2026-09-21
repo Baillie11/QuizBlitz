@@ -1,7 +1,7 @@
 {
-  "name": "triviaapp",
+  "name": "quizblitz",
   "version": "1.0.0",
-  "description": "TriviaApp – Level 1 monorepo (backend + mobile)",
+  "description": "QuizBlitz – Level 1 monorepo (backend + mobile)",
   "private": true,
   "scripts": {
     "backend": "npm --prefix backend start",

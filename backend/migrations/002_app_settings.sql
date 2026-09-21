@@ -1,9 +1,9 @@
 -- ============================================================
--- TriviaApp – Migration 002: App Settings
--- Run: mysql -u root triviaapp < backend/migrations/002_app_settings.sql
+-- QuizBlitz – Migration 002: App Settings
+-- Run: mysql -u root quizblitz < backend/migrations/002_app_settings.sql
 -- ============================================================
 
-USE triviaapp;
+USE quizblitz;
 
 CREATE TABLE IF NOT EXISTS app_settings (
   `key`        VARCHAR(100) NOT NULL,

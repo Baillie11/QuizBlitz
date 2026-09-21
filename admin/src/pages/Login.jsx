@@ -100,7 +100,7 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>🎯 TriviaApp</h1>
+        <h1>🎯 QuizBlitz</h1>
         <p>Admin Panel — sign in to continue</p>
         {error && <div className="alert alert-error">{error}</div>}
         <form onSubmit={handleSubmit}>

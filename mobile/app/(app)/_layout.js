@@ -28,6 +28,15 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="categories"
+        options={{
+          title: 'Categories',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="multiplayer"
         options={{
           title: 'Multiplayer',
@@ -42,6 +51,15 @@ export default function AppLayout() {
           title: 'Settings',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-circle-outline" size={size} color={color} />
           ),
         }}
       />

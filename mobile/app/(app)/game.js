@@ -11,25 +11,41 @@ import AdInterstitial from '../../src/components/AdInterstitial';
 import { COLORS, ANSWER_REVEAL_DELAY_MS } from '../../src/config';
 
 export default function GameScreen() {
-  const { categoryId, categoryName, difficulty, amount } = useLocalSearchParams();
-  const { showAds } = useAuth();
+  const { categoryId, categoryName, difficulty, amount, gameId } = useLocalSearchParams();
+  const { showAds, showQuestionTimer } = useAuth();
   const router = useRouter();
 
   const [questions, setQuestions]       = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected]         = useState(null);   // chosen answer string
   const [showFeedback, setShowFeedback] = useState(false);
-  const [score, setScore]               = useState(0);
+  const [score, setScore]               = useState(0); // points earned
+  const [correctCount, setCorrectCount] = useState(0);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
   const timerRef    = useRef(null);
   const tickRef     = useRef(null);       // interval for live timer
   const startTimeRef = useRef(null);     // Date.now() when question shown
+  const answerTimesRef = useRef([]);     // elapsed milliseconds for each question
   const [elapsed, setElapsed]   = useState(0);    // ms since question shown
   const [answerTime, setAnswerTime] = useState(null); // ms taken to answer
 
   useEffect(() => {
     async function load() {
+      clearTimeout(timerRef.current);
+      clearInterval(tickRef.current);
+      setQuestions([]);
+      setCurrentIndex(0);
+      setSelected(null);
+      setShowFeedback(false);
+      setScore(0);
+      setCorrectCount(0);
+      setElapsed(0);
+      setAnswerTime(null);
+      setError('');
+      setLoading(true);
+      startTimeRef.current = null;
+      answerTimesRef.current = [];
       try {
         const diff = difficulty === 'any' ? undefined : difficulty;
         const { questions: qs } = await startGame(
@@ -44,7 +60,7 @@ export default function GameScreen() {
     }
     load();
     return () => { clearTimeout(timerRef.current); clearInterval(tickRef.current); };
-  }, []);
+  }, [categoryId, difficulty, amount, gameId]);
 
   // Start/reset the live timer whenever the question index changes
   useEffect(() => {
@@ -64,13 +80,16 @@ export default function GameScreen() {
 
     // Record answer time and stop the live timer
     const taken = Date.now() - startTimeRef.current;
+    answerTimesRef.current[currentIndex] = taken;
     setAnswerTime(taken);
     clearInterval(tickRef.current);
 
     const isCorrect = answer === questions[currentIndex].correct_answer;
     const pts = questions[currentIndex].points || 2;
     const newScore = isCorrect ? score + pts : score;
+    const newCorrectCount = isCorrect ? correctCount + 1 : correctCount;
     if (isCorrect) setScore(newScore);
+    if (isCorrect) setCorrectCount(newCorrectCount);
 
     setSelected(answer);
     setShowFeedback(true);
@@ -85,12 +104,17 @@ export default function GameScreen() {
         AdInterstitial.show(showAds);
         // Submit game session in background
         try {
-          await submitGame(parseInt(categoryId), difficulty, newScore, questions.length);
+          const totalTimeMs = answerTimesRef.current.reduce((sum, value) => sum + value, 0);
+          await submitGame(parseInt(categoryId), difficulty, newCorrectCount, questions.length, {
+            totalTimeMs,
+            answerTimesMs: answerTimesRef.current,
+          });
         } catch { /* non-fatal */ }
         router.replace({
           pathname: '/(app)/results',
           params: {
-            score: newScore,
+            score: newCorrectCount,
+            points: newScore,
             total: questions.length,
             categoryId,
             categoryName,
@@ -168,7 +192,7 @@ export default function GameScreen() {
         </Text>
 
         {/* Timer */}
-        <View style={styles.timerRow}>
+        {showQuestionTimer && <View style={styles.timerRow}>
           <Text style={[
             styles.timerText,
             answerTime !== null && styles.timerDone,
@@ -178,7 +202,7 @@ export default function GameScreen() {
               : `⏱ ${(elapsed / 1000).toFixed(1)}s`
             }
           </Text>
-        </View>
+        </View>}
 
         {/* Question */}
         <View style={styles.questionCard}>

@@ -1,9 +1,9 @@
 -- ============================================================
--- TriviaApp – Migration 003: Admin Users
--- Run: mysql -u root triviaapp < backend/migrations/003_admin_users.sql
+-- QuizBlitz – Migration 003: Admin Users
+-- Run: mysql -u root quizblitz < backend/migrations/003_admin_users.sql
 -- ============================================================
 
-USE triviaapp;
+USE quizblitz;
 
 CREATE TABLE IF NOT EXISTS admin_users (
   id                   INT          NOT NULL AUTO_INCREMENT,

@@ -15,12 +15,14 @@ async function start() {
     console.log('✅ Models synced.');
 
     app.listen(PORT, () => {
-      console.log(`🚀 TriviaApp backend running on http://localhost:${PORT}`);
+      console.log(`🚀 QuizBlitz backend running on http://localhost:${PORT}`);
     });
 
     // Start the room scheduler
-    const { startScheduler } = require('./services/scheduler');
-    startScheduler();
+    if (process.env.ENABLE_MULTIPLAYER_SCHEDULER !== 'false') {
+      const { startScheduler } = require('./services/scheduler');
+      startScheduler();
+    }
   } catch (err) {
     console.error('❌ Failed to start server:', err);
     process.exit(1);

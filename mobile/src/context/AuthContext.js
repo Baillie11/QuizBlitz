@@ -6,6 +6,7 @@ import {
   getMe,
   getConfig,
   updateMe as apiUpdateMe,
+  timerPreferenceStorage,
 } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -14,17 +15,20 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [appConfig, setAppConfig] = useState({ adsEnabled: false, premiumEnabled: false });
   const [loading, setLoading] = useState(true);
+  const [showQuestionTimer, setShowQuestionTimerState] = useState(false);
 
   // Bootstrap: restore session and fetch server config on app start
   useEffect(() => {
     async function init() {
       try {
-        const [storedToken, config] = await Promise.all([
+        const [storedToken, config, timerEnabled] = await Promise.all([
           tokenStorage.get(),
           getConfig().catch(() => ({ adsEnabled: false, premiumEnabled: false })),
+          timerPreferenceStorage.get().catch(() => false),
         ]);
 
         setAppConfig(config);
+        setShowQuestionTimerState(timerEnabled);
 
         if (storedToken) {
           const { user: me } = await getMe();
@@ -65,6 +69,11 @@ export function AuthProvider({ children }) {
     return u;
   };
 
+  const setShowQuestionTimer = async (enabled) => {
+    setShowQuestionTimerState(enabled);
+    await timerPreferenceStorage.set(enabled);
+  };
+
   /**
    * Ads are shown when:
    *  - Server flag adsEnabled is true, AND
@@ -76,7 +85,10 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, appConfig, showAds, login, register, logout, updateUser, setUser }}
+      value={{
+        user, loading, appConfig, showAds, showQuestionTimer,
+        login, register, logout, updateUser, setUser, setShowQuestionTimer,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,27 +1,22 @@
 {
   "expo": {
-    "name": "TriviaApp",
-    "slug": "triviaapp",
+    "name": "QuizBlitz",
+    "slug": "quizblitz",
     "version": "1.0.0",
-    "scheme": "triviaapp",
+    "scheme": "quizblitz",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#6C47FF"
-    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.triviaapp"
+      "bundleIdentifier": "com.baillie11.quizblitz"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6C47FF"
       },
-      "package": "com.yourcompany.triviaapp"
+      "package": "com.baillie11.quizblitz"
     },
     "web": {
       "bundler": "metro",
@@ -32,10 +27,33 @@
       "expo-router",
       "expo-secure-store",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#6C47FF"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "faf40599-913f-4c95-b151-7f0e97855446"
+      }
+    },
+    "owner": "yolodating"
   }
 }

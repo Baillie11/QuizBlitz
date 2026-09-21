@@ -1,7 +1,7 @@
 {
-  "name": "triviaapp-backend",
+  "name": "quizblitz-backend",
   "version": "1.0.0",
-  "description": "TriviaApp backend – Node.js + Express + MySQL + Sequelize",
+  "description": "QuizBlitz backend – Node.js + Express + Sequelize",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -16,6 +16,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.9.2",
     "node-fetch": "^2.7.0",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.3"
   },
   "devDependencies": {

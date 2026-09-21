@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, GameSession, Category } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 
 function signToken(user) {
@@ -71,6 +71,34 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /auth/forgot-password
+// Development-only reset flow for device testing. Production should replace
+// this with a short-lived token delivered through a verified email provider.
+router.post('/forgot-password', async (req, res) => {
+  if (process.env.ALLOW_DEV_PASSWORD_RESET !== 'true') {
+    return res.status(503).json({ error: 'Password reset is not configured. Please contact support.' });
+  }
+
+  const { email, newPassword } = req.body;
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: 'Email and a new password are required' });
+  }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+
+  try {
+    const user = await User.findOne({ where: { email: email.toLowerCase().trim() } });
+    if (!user) return res.status(404).json({ error: 'No account was found for that email' });
+    user.password_hash = await bcrypt.hash(newPassword, 12);
+    await user.save();
+    return res.json({ message: 'Password updated. You can now log in.' });
+  } catch (err) {
+    console.error('[auth/forgot-password]', err);
+    return res.status(500).json({ error: 'Password reset failed' });
+  }
+});
+
 // GET /auth/me
 router.get('/me', authMiddleware, async (req, res) => {
   try {
@@ -84,11 +112,22 @@ router.get('/me', authMiddleware, async (req, res) => {
 
 // PUT /auth/me – update profile fields
 router.put('/me', authMiddleware, async (req, res) => {
-  const { displayName, adOptOut, preferredCategories } = req.body;
+  const { email, displayName, adOptOut, preferredCategories } = req.body;
   try {
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    if (email !== undefined) {
+      const normalizedEmail = email.toLowerCase().trim();
+      if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+        return res.status(400).json({ error: 'Please enter a valid email address' });
+      }
+      const existing = await User.findOne({ where: { email: normalizedEmail } });
+      if (existing && existing.id !== user.id) {
+        return res.status(409).json({ error: 'That email address is already in use' });
+      }
+      user.email = normalizedEmail;
+    }
     if (displayName !== undefined) user.display_name = displayName;
     if (adOptOut !== undefined) user.ad_opt_out = Boolean(adOptOut);
     if (preferredCategories !== undefined) user.preferred_categories = preferredCategories;
@@ -98,6 +137,59 @@ router.put('/me', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[update me]', err);
     return res.status(500).json({ error: 'Profile update failed' });
+  }
+});
+
+// GET /auth/profile - player details, lifetime statistics, and recent games
+router.get('/profile', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const where = { user_id: user.id };
+    const [gamesPlayed, totalScore, totalQuestions, totalAnswerTimeMs, sessions] = await Promise.all([
+      GameSession.count({ where }),
+      GameSession.sum('score', { where }),
+      GameSession.sum('total_questions', { where }),
+      GameSession.sum('total_time_ms', { where }),
+      GameSession.findAll({
+        where,
+        include: [{ model: Category, as: 'category', attributes: ['name'] }],
+        order: [['finished_at', 'DESC'], ['id', 'DESC']],
+        limit: 25,
+      }),
+    ]);
+
+    const correct = Number(totalScore) || 0;
+    const answered = Number(totalQuestions) || 0;
+    const answerTime = Number(totalAnswerTimeMs) || 0;
+    return res.json({
+      user: sanitizeUser(user),
+      stats: {
+        gamesPlayed,
+        totalScore: correct,
+        totalQuestions: answered,
+        accuracy: answered ? Math.round((correct / answered) * 100) : 0,
+        totalAnswerTimeMs: answerTime,
+        averageAnswerTimeMs: answered ? Math.round(answerTime / answered) : 0,
+      },
+      history: sessions.map((session) => ({
+        id: session.id,
+        category: session.category?.name || 'Unknown category',
+        difficulty: session.difficulty || 'Mixed',
+        score: session.score,
+        totalQuestions: session.total_questions,
+        percentage: session.total_questions
+          ? Math.round((session.score / session.total_questions) * 100)
+          : 0,
+        totalAnswerTimeMs: session.total_time_ms,
+        answerTimesMs: session.answer_times_json || [],
+        playedAt: session.finished_at,
+      })),
+    });
+  } catch (err) {
+    console.error('[auth/profile]', err);
+    return res.status(500).json({ error: 'Failed to load player profile' });
   }
 });
 

@@ -40,7 +40,7 @@ export default function RegisterScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Text style={styles.emoji}>🎯</Text>
-          <Text style={styles.title}>TriviaApp</Text>
+          <Text style={styles.title}>QuizBlitz</Text>
           <Text style={styles.subtitle}>Create your account</Text>
         </View>
 

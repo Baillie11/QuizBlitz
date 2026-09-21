@@ -39,7 +39,7 @@ export default function LoginScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Text style={styles.emoji}>🎯</Text>
-          <Text style={styles.title}>TriviaApp</Text>
+          <Text style={styles.title}>QuizBlitz</Text>
           <Text style={styles.subtitle}>Test your knowledge</Text>
         </View>
 
@@ -82,6 +82,10 @@ export default function LoginScreen() {
               <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')}>
+            <Text style={styles.forgotLink}>Forgot password?</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.btn, loading && styles.btnDisabled]}
@@ -158,6 +162,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   eyeIcon: { fontSize: 18 },
+  forgotLink: {
+    alignSelf: 'flex-end',
+    color: COLORS.primary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: -6,
+    marginBottom: 14,
+  },
   btn: {
     backgroundColor: COLORS.primary,
     borderRadius: 12,

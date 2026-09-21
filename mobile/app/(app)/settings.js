@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Alert, Platform,
+  SafeAreaView, ScrollView, Alert, Platform, Switch,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
@@ -9,7 +9,7 @@ import { resetMyPassword } from '../../src/services/api';
 import { COLORS } from '../../src/config';
 
 export default function SettingsScreen() {
-  const { user, showAds, logout } = useAuth();
+  const { user, showAds, showQuestionTimer, setShowQuestionTimer, logout } = useAuth();
   const router = useRouter();
   const [resetting, setResetting] = useState(false);
 
@@ -83,6 +83,25 @@ export default function SettingsScreen() {
               {user?.isPremium ? '⭐ Premium' : 'Free'}
             </Text>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Gameplay</Text>
+          <View style={styles.row}>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowLabel}>Show question timer</Text>
+              <Text style={styles.rowSub}>Display elapsed time while answering</Text>
+            </View>
+            <Switch
+              value={showQuestionTimer}
+              onValueChange={setShowQuestionTimer}
+              trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
+              thumbColor={showQuestionTimer ? COLORS.primary : '#F4F4F5'}
+            />
+          </View>
+          <Text style={styles.privacyNote}>
+            Answer times are recorded for game statistics even when the timer is hidden.
+          </Text>
         </View>
 
         {/* Ads section */}
@@ -194,6 +213,7 @@ const styles = StyleSheet.create({
   rowValue: { fontSize: 13, fontWeight: '700', marginTop: 2 },
   valueOn: { color: COLORS.primary },
   valueOff: { color: COLORS.success },
+  privacyNote: { fontSize: 12, color: COLORS.textSecondary, marginTop: 8, lineHeight: 17 },
 
   premiumBtn: {
     backgroundColor: '#FFF9C4',

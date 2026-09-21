@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../config';
 // ── Token storage ─────────────────────────────────────────────────────────────
 // expo-secure-store is unavailable on web; fall back to localStorage.
 const TOKEN_KEY = 'trivia_auth_token';
+const SHOW_QUESTION_TIMER_KEY = 'quizblitz_show_question_timer';
 
 export const tokenStorage = {
   get: async () => {
@@ -19,6 +20,20 @@ export const tokenStorage = {
   delete: async () => {
     if (Platform.OS === 'web') return localStorage.removeItem(TOKEN_KEY);
     return SecureStore.deleteItemAsync(TOKEN_KEY);
+  },
+};
+
+export const timerPreferenceStorage = {
+  get: async () => {
+    const value = Platform.OS === 'web'
+      ? localStorage.getItem(SHOW_QUESTION_TIMER_KEY)
+      : await SecureStore.getItemAsync(SHOW_QUESTION_TIMER_KEY);
+    return value === 'true';
+  },
+  set: async (enabled) => {
+    const value = enabled ? 'true' : 'false';
+    if (Platform.OS === 'web') return localStorage.setItem(SHOW_QUESTION_TIMER_KEY, value);
+    return SecureStore.setItemAsync(SHOW_QUESTION_TIMER_KEY, value);
   },
 };
 
@@ -38,7 +53,12 @@ export const register = (email, password, displayName) =>
 export const login = (email, password) =>
   api.post('/auth/login', { email, password }).then((r) => r.data);
 
+export const forgotPassword = (email, newPassword) =>
+  api.post('/auth/forgot-password', { email, newPassword }).then((r) => r.data);
+
 export const getMe = () => api.get('/auth/me').then((r) => r.data);
+
+export const getProfile = () => api.get('/auth/profile').then((r) => r.data);
 
 export const updateMe = (data) => api.put('/auth/me', data).then((r) => r.data);
 
@@ -55,8 +75,8 @@ export const getConfig = () => api.get('/config').then((r) => r.data);
 export const startGame = (categoryId, difficulty, amount) =>
   api.post('/game/start', { categoryId, difficulty, amount }).then((r) => r.data);
 
-export const submitGame = (categoryId, difficulty, score, totalQuestions) =>
-  api.post('/game/submit', { categoryId, difficulty, score, totalQuestions }).then((r) => r.data);
+export const submitGame = (categoryId, difficulty, score, totalQuestions, timing = {}) =>
+  api.post('/game/submit', { categoryId, difficulty, score, totalQuestions, ...timing }).then((r) => r.data);
 
 // ── Multiplayer ───────────────────────────────────────────────────────────────────
 export const getMultiplayerRooms = () =>

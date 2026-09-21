@@ -11,6 +11,8 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -22,15 +24,18 @@ export default function ForgotPasswordScreen() {
     if (!email.trim()) {
       return setError('Please enter your email address.');
     }
+    if (newPassword.length < 8) {
+      return setError('Your new password must be at least 8 characters.');
+    }
+    if (newPassword !== confirmPassword) {
+      return setError('The passwords do not match.');
+    }
 
     setLoading(true);
     try {
-      // Call the API endpoint to initiate password reset
-      // Note: This assumes you have a /auth/forgot-password endpoint on the backend
-      const response = await api.api.post('/auth/forgot-password', { email: email.trim() });
+      const response = await api.forgotPassword(email.trim(), newPassword);
       
-      setSuccess(response?.message || 'Check your email for password reset instructions.');
-      setEmail('');
+      setSuccess(response?.message || 'Password updated. You can now log in.');
       
       // Optionally redirect to login after 3 seconds
       setTimeout(() => {
@@ -52,14 +57,14 @@ export default function ForgotPasswordScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Text style={styles.emoji}>🎯</Text>
-          <Text style={styles.title}>TriviaApp</Text>
+          <Text style={styles.title}>QuizBlitz</Text>
           <Text style={styles.subtitle}>Reset your password</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Forgot Password?</Text>
           <Text style={styles.description}>
-            Enter your email address and we'll send you a link to reset your password.
+            For local device testing, enter your account email and choose a new password.
           </Text>
 
           {!!error && <Text style={styles.error}>{error}</Text>}
@@ -78,6 +83,30 @@ export default function ForgotPasswordScreen() {
             editable={!loading}
           />
 
+          <Text style={styles.label}>New password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="At least 8 characters"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            editable={!loading}
+          />
+
+          <Text style={styles.label}>Confirm new password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter it again"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            returnKeyType="done"
+            onSubmitEditing={handleResetPassword}
+            editable={!loading}
+          />
+
           <TouchableOpacity
             style={[styles.btn, loading && styles.btnDisabled]}
             onPress={handleResetPassword}
@@ -86,7 +115,7 @@ export default function ForgotPasswordScreen() {
             {loading ? (
               <ActivityIndicator color={COLORS.white} />
             ) : (
-              <Text style={styles.btnText}>Send Reset Link</Text>
+              <Text style={styles.btnText}>Set New Password</Text>
             )}
           </TouchableOpacity>
 

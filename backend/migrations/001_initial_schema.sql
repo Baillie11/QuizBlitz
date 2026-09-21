@@ -1,13 +1,13 @@
 -- ============================================================
--- TriviaApp – Initial Schema  (MySQL / MariaDB)
--- Run via phpMyAdmin, cPanel MySQL, or CLI: mysql -u root -p triviaapp < 001_initial_schema.sql
+-- QuizBlitz – Initial Schema  (MySQL / MariaDB)
+-- Run via phpMyAdmin, cPanel MySQL, or CLI: mysql -u root -p quizblitz < 001_initial_schema.sql
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS triviaapp
+CREATE DATABASE IF NOT EXISTS quizblitz
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE triviaapp;
+USE quizblitz;
 
 -- ── users ─────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
