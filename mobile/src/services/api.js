@@ -38,7 +38,7 @@ export const timerPreferenceStorage = {
 };
 
 // ── Axios instance ────────────────────────────────────────────────────────────
-const api = axios.create({ baseURL: API_BASE_URL, timeout: 15000 });
+const api = axios.create({ baseURL: API_BASE_URL, timeout: 75000 });
 
 api.interceptors.request.use(async (config) => {
   const token = await tokenStorage.get();
@@ -53,8 +53,8 @@ export const register = (email, password, displayName) =>
 export const login = (email, password) =>
   api.post('/auth/login', { email, password }).then((r) => r.data);
 
-export const forgotPassword = (email, newPassword) =>
-  api.post('/auth/forgot-password', { email, newPassword }).then((r) => r.data);
+export const forgotPassword = (email, resetCode, newPassword) =>
+  api.post('/auth/forgot-password', { email, resetCode, newPassword }).then((r) => r.data);
 
 export const getMe = () => api.get('/auth/me').then((r) => r.data);
 

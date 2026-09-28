@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { User, GameSession, Category } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
@@ -71,27 +72,58 @@ router.post('/login', async (req, res) => {
   }
 });
 
+const passwordResetAttempts = new Map();
+const PASSWORD_RESET_WINDOW_MS = 15 * 60 * 1000;
+const PASSWORD_RESET_MAX_ATTEMPTS = 5;
+
+function matchesSecret(value, expected) {
+  const supplied = Buffer.from(String(value || ''), 'utf8');
+  const configured = Buffer.from(String(expected || ''), 'utf8');
+  return supplied.length === configured.length && crypto.timingSafeEqual(supplied, configured);
+}
+
+function isResetRateLimited(key) {
+  const now = Date.now();
+  const recent = (passwordResetAttempts.get(key) || []).filter(
+    (attemptedAt) => now - attemptedAt < PASSWORD_RESET_WINDOW_MS
+  );
+  recent.push(now);
+  passwordResetAttempts.set(key, recent);
+  return recent.length > PASSWORD_RESET_MAX_ATTEMPTS;
+}
+
 // POST /auth/forgot-password
-// Development-only reset flow for device testing. Production should replace
-// this with a short-lived token delivered through a verified email provider.
+// Closed-beta reset flow. The reset code is configured only on the server and
+// can be replaced by an emailed, single-use token before a public launch.
 router.post('/forgot-password', async (req, res) => {
-  if (process.env.ALLOW_DEV_PASSWORD_RESET !== 'true') {
+  const configuredResetCode = process.env.PASSWORD_RESET_CODE;
+  if (!configuredResetCode) {
     return res.status(503).json({ error: 'Password reset is not configured. Please contact support.' });
   }
 
-  const { email, newPassword } = req.body;
-  if (!email || !newPassword) {
-    return res.status(400).json({ error: 'Email and a new password are required' });
+  const { email, newPassword, resetCode } = req.body;
+  if (!email || !newPassword || !resetCode) {
+    return res.status(400).json({ error: 'Email, reset code, and a new password are required' });
   }
   if (newPassword.length < 8) {
     return res.status(400).json({ error: 'Password must be at least 8 characters' });
   }
 
+  const normalizedEmail = email.toLowerCase().trim();
+  const attemptKey = `${req.ip}:${normalizedEmail}`;
+  if (isResetRateLimited(attemptKey)) {
+    return res.status(429).json({ error: 'Too many reset attempts. Please wait 15 minutes and try again.' });
+  }
+  if (!matchesSecret(resetCode.trim(), configuredResetCode)) {
+    return res.status(400).json({ error: 'Invalid email or reset code' });
+  }
+
   try {
-    const user = await User.findOne({ where: { email: email.toLowerCase().trim() } });
-    if (!user) return res.status(404).json({ error: 'No account was found for that email' });
+    const user = await User.findOne({ where: { email: normalizedEmail } });
+    if (!user) return res.status(400).json({ error: 'Invalid email or reset code' });
     user.password_hash = await bcrypt.hash(newPassword, 12);
     await user.save();
+    passwordResetAttempts.delete(attemptKey);
     return res.json({ message: 'Password updated. You can now log in.' });
   } catch (err) {
     console.error('[auth/forgot-password]', err);

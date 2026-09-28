@@ -11,6 +11,7 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,9 @@ export default function ForgotPasswordScreen() {
     if (!email.trim()) {
       return setError('Please enter your email address.');
     }
+    if (!resetCode.trim()) {
+      return setError('Please enter your reset code.');
+    }
     if (newPassword.length < 8) {
       return setError('Your new password must be at least 8 characters.');
     }
@@ -33,7 +37,7 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     try {
-      const response = await api.forgotPassword(email.trim(), newPassword);
+      const response = await api.forgotPassword(email.trim(), resetCode.trim(), newPassword);
       
       setSuccess(response?.message || 'Password updated. You can now log in.');
       
@@ -64,7 +68,7 @@ export default function ForgotPasswordScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Forgot Password?</Text>
           <Text style={styles.description}>
-            For local device testing, enter your account email and choose a new password.
+            Enter your account email, the reset code provided for testing, and a new password.
           </Text>
 
           {!!error && <Text style={styles.error}>{error}</Text>}
@@ -80,6 +84,17 @@ export default function ForgotPasswordScreen() {
             keyboardType="email-address"
             returnKeyType="send"
             onSubmitEditing={handleResetPassword}
+            editable={!loading}
+          />
+
+          <Text style={styles.label}>Reset code</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your reset code"
+            value={resetCode}
+            onChangeText={setResetCode}
+            autoCapitalize="none"
+            autoCorrect={false}
             editable={!loading}
           />
 

@@ -25,8 +25,8 @@ services:
         value: "false"
       - key: PREMIUM_ENABLED
         value: "false"
-      - key: ALLOW_DEV_PASSWORD_RESET
-        value: "false"
+      - key: PASSWORD_RESET_CODE
+        sync: false
       - key: ENABLE_MULTIPLAYER_SCHEDULER
         value: "false"
 
