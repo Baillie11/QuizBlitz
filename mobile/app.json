@@ -12,6 +12,7 @@
       "bundleIdentifier": "com.baillie11.quizblitz"
     },
     "android": {
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6C47FF"

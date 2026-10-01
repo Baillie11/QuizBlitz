@@ -35,9 +35,13 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <View style={styles.header}>
           <Text style={styles.emoji}>🎯</Text>
           <Text style={styles.title}>QuizBlitz</Text>
@@ -105,7 +109,7 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.background },
-  container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingBottom: 48 },
   header: { alignItems: 'center', marginBottom: 32 },
   emoji: { fontSize: 56 },
   title: { fontSize: 32, fontWeight: '800', color: COLORS.primary, marginTop: 8 },

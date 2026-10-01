@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, ActivityIndicator, Platform,
+  SafeAreaView, ScrollView, ActivityIndicator, Platform, KeyboardAvoidingView,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -74,7 +74,15 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <Text style={styles.title}>Player Profile</Text>
 
         <View style={styles.profileCard}>
@@ -140,6 +148,7 @@ export default function ProfileScreen() {
           </View>
         ))}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -154,6 +163,7 @@ function Stat({ label, value, icon }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
+  flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
   container: { padding: 20, paddingBottom: 48, ...Platform.select({ web: { maxWidth: 720, width: '100%', alignSelf: 'center' } }) },
   title: { fontSize: 28, fontWeight: '800', color: COLORS.text, marginBottom: 20 },
